@@ -18,5 +18,36 @@
 <a href="aylar.html" class="back">← Aylar</a>
 
 <script src="script.js"></script>
+  <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBHXwARt_g0fLa4XlelwWsLT5FQyEPBBqc",
+  authDomain: "ajanda-e0287.firebaseapp.com",
+  databaseURL: "https://ajanda-e0287-default-rtdb.firebaseio.com",
+  projectId: "ajanda-e0287",
+  appId: "1:819622658290:web:28e097a95a51d1eb8b106b"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+/* 🔥 SAYFA AÇILINCA TÜM INPUTLARI DOLDUR */
+document.querySelectorAll("input[data-ay]").forEach(input => {
+  const ay = input.dataset.ay;
+  const gun = input.dataset.gun;
+
+  db.ref(`ajanda/${ay}/${gun}`).on("value", snap => {
+    input.value = snap.val() || "";
+  });
+});
+
+/* 🔥 YAZDIKÇA KAYDET */
+function save(el) {
+  const ay = el.dataset.ay;
+  const gun = el.dataset.gun;
+  db.ref(`ajanda/${ay}/${gun}`).set(el.value);
+}
+</script>
+
 </body>
 </html>
+
