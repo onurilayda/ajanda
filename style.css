@@ -1,0 +1,539 @@
+:root{
+  --bg:#f6f4ef;
+  --card:#ffffff;
+  --text:#2c2c2c;
+  --accent:#3a5a40;
+  --soft:#dad7cd;
+}
+
+body{
+  margin:0;
+  font-family:Georgia, serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+.title{
+  text-align:center;
+  margin:40px 0 10px;
+  font-size:3rem;
+  color:var(--accent);
+}
+
+.subtitle{
+  text-align:center;
+  color:#555;
+  margin-bottom:40px;
+}
+
+/* AY KARTLARI */
+.months{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:25px;
+  padding:40px;
+}
+
+.month{
+  background:var(--card);
+  border:1px solid var(--soft);
+  padding:35px;
+  text-align:center;
+  border-radius:14px;
+  text-decoration:none;
+  color:var(--text);
+  font-size:1.3rem;
+  transition:.3s;
+}
+
+.month:hover{
+  transform:translateY(-8px);
+  background:var(--accent);
+  color:white;
+}
+
+/* GÜNLER */
+.calendar{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:30px;
+  padding:40px;
+}
+
+.day{
+  background:var(--card);
+  border:1px solid var(--soft);
+  border-radius:16px;
+  padding:20px;
+  transition:.3s;
+}
+
+.day:hover{
+  transform:translateY(-6px);
+}
+
+textarea{
+  width:100%;
+  height:90px;
+  border:1px solid var(--soft);
+  border-radius:8px;
+  padding:10px;
+  margin-bottom:10px;
+}
+
+.day-gallery{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(80px,1fr));
+  gap:10px;
+}
+
+.day-gallery img{
+  width:100%;
+  border-radius:8px;
+}
+
+/* HAFTALIK */
+.week-card{
+  background:var(--card);
+  border:1px solid var(--soft);
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:30px;
+}
+
+.week-days{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.day-small{
+  flex:1 1 30%;
+  border:1px solid var(--soft);
+  border-radius:12px;
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+}
+
+.day-small span{
+  font-weight:bold;
+  color:var(--accent);
+  margin-bottom:5px;
+}
+
+.day-small textarea{
+  font-size:0.8rem;
+  height:60px;
+  margin-bottom:5px;
+}
+
+/* FOTO KUTU */
+.img-wrap{
+  position:relative;
+}
+
+.img-wrap span{
+  position:absolute;
+  top:5px;
+  right:5px;
+  background:rgba(0,0,0,.6);
+  color:white;
+  font-size:12px;
+  padding:4px 6px;
+  border-radius:6px;
+  cursor:pointer;
+  opacity:0;
+  transition:.2s;
+}
+
+.img-wrap:hover span{
+  opacity:1;
+}
+
+/* LIGHTBOX */
+#lightbox{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  pointer-events:none;
+  transition:.3s;
+  z-index:999;
+}
+
+#lightbox.show{
+  opacity:1;
+  pointer-events:auto;
+}
+
+#lightbox img{
+  max-width:90%;
+  max-height:90%;
+  border-radius:12px;
+  animation:zoomIn .3s ease;
+}
+
+#closeLightbox{
+  position:absolute;
+  top:20px;
+  right:20px;
+  background:none;
+  border:none;
+  color:white;
+  font-size:28px;
+  cursor:pointer;
+}
+
+/* ANİMASYONLAR */
+.fade-in{ animation:fadeIn .8s ease; }
+.fade-up{ animation:fadeUp .6s ease; }
+.slide-down{ animation:slideDown .7s ease; }
+
+@keyframes fadeIn{
+  from{opacity:0;}
+  to{opacity:1;}
+}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px);}
+  to{opacity:1;transform:none;}
+}
+@keyframes slideDown{
+  from{opacity:0;transform:translateY(-20px);}
+  to{opacity:1;}
+}
+@keyframes zoomIn{
+  from{transform:scale(.7);opacity:0;}
+  to{transform:scale(1);opacity:1;}
+}
+
+.back{
+  display:block;
+  text-align:center;
+  margin:30px;
+  color:var(--accent);
+  text-decoration:none;
+}
+
+.view-toggle{
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  margin-bottom:20px;
+}
+
+.view-toggle button{
+  padding:10px 20px;
+  border-radius:8px;
+  border:none;
+  background:var(--accent);
+  color:white;
+  cursor:pointer;
+  font-weight:bold;
+  transition:.3s;
+}
+
+.view-toggle button:hover{
+  background:#5a7c5a;
+}
+/* ========== EK ÖZELLİKLER (ESKİYİ BOZMAZ) ========== */
+
+/* DARK MODE */
+body.dark{
+  --bg:#1b1b1b;
+  --card:#242424;
+  --text:#f1f1f1;
+  --soft:#333;
+  --accent:#8fb996;
+}
+
+
+/* SAYFA ÇEVİRME */
+.page{
+  animation:pageTurn .5s ease;
+  transform-origin:left center;
+}
+@keyframes pageTurn{
+  from{ transform:rotateY(-70deg); opacity:0; }
+  to{ transform:none; opacity:1; }
+}
+
+/* DEFTER SAĞ MARJ (GERÇEK BOŞLUK) */
+.calendar{
+  padding-right:180px !important;
+  position:relative;
+}
+
+.calendar::after{
+  content:"";
+  position:absolute;
+  right:100px;
+  top:0;
+  width:2px;
+  height:100%;
+  background:linear-gradient(
+    to bottom,
+    transparent,
+    var(--soft),
+    transparent
+  );
+}
+
+.day{
+  max-width:420px;
+  justify-self:start;
+}
+
+/* DRAG */
+.dragging{
+  opacity:.4;
+}
+/* INDEX (GİRİŞ) */
+.center{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+
+.big-title{
+  font-size:4rem;
+  letter-spacing:5px;
+  color:var(--accent);
+  margin-bottom:10px;
+}
+
+.center p{
+  color:#555;
+  font-size:1.1rem;
+  margin-bottom:30px;
+}
+
+.btn{
+  text-decoration:none;
+  background:var(--accent);
+  color:white;
+  padding:14px 45px;
+  border-radius:30px;
+  font-size:1.1rem;
+  transition:.3s;
+}
+
+.btn:hover{
+  transform:translateY(-4px);
+  background:#5a7c5a;
+}
+/* AYLAR – PREMIUM & SIKI */
+.months{
+  max-width:1000px;
+  margin:auto;
+  padding:60px 40px;
+  gap:20px;
+}
+
+.month{
+  height:140px;
+  border-radius:18px;
+  background-size:cover;
+  background-position:center;
+  color:white;
+  display:flex;
+  align-items:flex-end;
+  padding:20px;
+  font-size:1.4rem;
+  font-weight:600;
+  letter-spacing:1px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 12px 25px rgba(0,0,0,.12);
+}
+
+.month::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(
+    to top,
+    rgba(0,0,0,.7),
+    rgba(0,0,0,.25)
+  );
+}
+
+.month span,
+.month{
+  z-index:1;
+}
+
+.month:hover{
+  transform:translateY(-8px) scale(1.02);
+}
+/* AYLAR – NUMARALI KART TASARIMI */
+.month{
+  position:relative;
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--soft);
+  height:140px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.4rem;
+  font-weight:600;
+  letter-spacing:1px;
+  border-radius:18px;
+  transition:.3s;
+}
+
+.month:hover{
+  background:var(--accent);
+  color:white;
+  transform:translateY(-8px);
+  box-shadow:0 20px 40px rgba(0,0,0,.15);
+}
+
+/* AY NUMARASI */
+.month::after{
+  content:attr(data-month);
+  position:absolute;
+  bottom:15px;
+  right:18px;
+  font-size:3.2rem;
+  font-weight:700;
+  color:rgba(0,0,0,.08);
+  pointer-events:none;
+}
+
+.month:hover::after{
+  color:rgba(255,255,255,.25);
+}
+/* AY NUMARA HOVER EFEKTİ */
+.month::after{
+  content:attr(data-month);
+  position:absolute;
+  bottom:14px;
+  right:18px;
+  font-size:3.2rem;
+  font-weight:700;
+  color:rgba(0,0,0,.08);
+  transition:.4s ease;
+  pointer-events:none;
+}
+
+.month:hover::after{
+  transform:scale(1.6);
+  opacity:0;
+}
+/* AY SAYFASI – SIKI & PREMİUM */
+.calendar{
+  grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));
+  gap:22px;
+  padding-top:20px;
+}
+
+/* GÜN KARTI */
+.day{
+  border-radius:14px;
+  padding:18px;
+  box-shadow:0 8px 18px rgba(0,0,0,.08);
+}
+
+.day h3{
+  margin-top:0;
+  margin-bottom:8px;
+  font-size:1.1rem;
+  color:var(--accent);
+}
+
+/* TEXTAREA DAHA DERLİ TOPLU */
+.day textarea{
+  height:100px;
+  font-size:.95rem;
+  line-height:1.5;
+  resize:none;
+}
+
+/* FOTO ALANI */
+.day-gallery{
+  margin-top:8px;
+}
+
+/* HOVER DAHA HAFİF */
+.day:hover{
+  transform:translateY(-4px);
+}
+/* GÜN KARTI – TEXT SAĞ MARJ */
+.day{
+  padding-right:40px; /* kartın içinde genel nefes */
+}
+
+/* textarea bilinçli daraltılıyor */
+.day textarea{
+  width:calc(100% - 25px); /* SAĞ BOŞLUK BURADA */
+}
+
+/* defter çizgisi hissi (opsiyonel ama çok yakışıyor) */
+.day::after{
+  content:"";
+  position:absolute;
+  top:18px;
+  right:22px;
+  width:2px;
+  height:calc(100% - 36px);
+  background:linear-gradient(
+    to bottom,
+    transparent,
+    var(--soft),
+    transparent
+  );
+  opacity:.6;
+}
+.img-wrap{
+  position:relative;
+}
+
+.img-wrap span{
+  position:absolute;
+  top:5px;
+  right:5px;
+  background:rgba(0,0,0,.6);
+  color:white;
+  font-size:12px;
+  padding:4px 6px;
+  border-radius:6px;
+  cursor:pointer;
+  opacity:0;
+  transition:.2s;
+}
+
+.img-wrap:hover span{
+  opacity:1;
+}
+
+#lightbox{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  pointer-events:none;
+  transition:.3s;
+  z-index:999;
+}
+
+#lightbox.show{
+  opacity:1;
+  pointer-events:auto;
+}
+
+#lightbox img{
+  max-width:90%;
+  max-height:90%;
+  border-radius:12px;
+}
