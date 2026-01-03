@@ -1,86 +1,59 @@
-/* ---------- THEME & FONT ---------- */
+/* ---------- FIREBASE AYARLARI ---------- */
+// BURAYI FIREBASE PANELİNDEN ALDIĞIN KENDİ BİLGİLERİNLE DEĞİŞTİR!
+const firebaseConfig = {
+  apiKey: "AIzaSyBHXwARt_g0fLa4XlelwWsLT5FQyEPBBqc",
+  authDomain: "ajanda-e0287.firebaseapp.com",
+  databaseURL: "https://ajanda-e0287-default-rtdb.firebaseio.com",
+  projectId: "ajanda-e0287",
+  storageBucket: "ajanda-e0287.firebasestorage.app",
+  messagingSenderId: "819622658290",
+  appId: "1:819622658290:web:28e097a95a51d1eb8b106b",
+  measurementId: "G-S12P6T3X1H"
+};
+
+// Firebase Başlat
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+/* ---------- TEMA İŞLEMLERİ ---------- */
 const themeBtn = document.getElementById("themeBtn");
 if(themeBtn){
-  themeBtn.onclick = ()=> document.body.classList.toggle("dark");
+  themeBtn.onclick = () => document.body.classList.toggle("dark");
 }
 
 /* ---------- AY VERİLERİ ---------- */
 const months = {
-  ocak:{ name:"Ocak", days:31 },
-  subat:{ name:"Şubat", days:28 },
-  mart:{ name:"Mart", days:31 },
-  nisan:{ name:"Nisan", days:30 },
-  mayis:{ name:"Mayıs", days:31 },
-  haziran:{ name:"Haziran", days:30 },
-  temmuz:{ name:"Temmuz", days:31 },
-  agustos:{ name:"Ağustos", days:31 },
-  eylul:{ name:"Eylül", days:30 },
-  ekim:{ name:"Ekim", days:31 },
-  kasim:{ name:"Kasım", days:30 },
-  aralik:{ name:"Aralık", days:31 }
+  ocak:{ name:"Ocak", days:31 }, subat:{ name:"Şubat", days:28 },
+  mart:{ name:"Mart", days:31 }, nisan:{ name:"Nisan", days:30 },
+  mayis:{ name:"Mayıs", days:31 }, haziran:{ name:"Haziran", days:30 },
+  temmuz:{ name:"Temmuz", days:31 }, agustos:{ name:"Ağustos", days:31 },
+  eylul:{ name:"Eylül", days:30 }, ekim:{ name:"Ekim", days:31 },
+  kasim:{ name:"Kasım", days:30 }, aralik:{ name:"Aralık", days:31 }
 };
 
 const params = new URLSearchParams(location.search);
 const ayKey = params.get("ay");
-
 const calendar = document.getElementById("calendar");
 
 if(ayKey && months[ayKey]){
-  document.getElementById("monthTitle").innerText =
-    months[ayKey].name + " 2026";
-
-  renderCalendar("daily");
+  const titleEl = document.getElementById("monthTitle");
+  if(titleEl) titleEl.innerText = months[ayKey].name + " 2026";
+  renderCalendar();
 }
 
-/* ---------- RENDER ---------- */
-function renderCalendar(view){
+/* ---------- TAKVİM OLUŞTURMA ---------- */
+function renderCalendar(){
+  if(!calendar) return;
   calendar.innerHTML = "";
-
-  if(view === "daily"){
-    for(let d=1; d<=months[ayKey].days; d++){
-      createDayCard(d);
-    }
-  } else {
-    const totalDays = months[ayKey].days;
-    const weeks = Math.ceil(totalDays / 7);
-
-    for(let w=0; w<weeks; w++){
-      const weekCard = document.createElement("div");
-      weekCard.className = "week-card fade-up";
-
-      const title = document.createElement("h3");
-      title.innerText = "Hafta " + (w+1);
-
-      const daysWrap = document.createElement("div");
-      daysWrap.className = "week-days";
-
-      for(let d=1+w*7; d<=Math.min((w+1)*7, totalDays); d++){
-        const dayDiv = document.createElement("div");
-        dayDiv.className = "day-small";
-
-        const span = document.createElement("span");
-        span.innerText = d;
-
-        const key = `${ayKey}-${d}-text`;
-        const ta = document.createElement("textarea");
-        ta.value = localStorage.getItem(key)||"";
-        ta.oninput = ()=> localStorage.setItem(key, ta.value);
-
-        dayDiv.append(span, ta);
-        daysWrap.appendChild(dayDiv);
-      }
-
-      weekCard.append(title, daysWrap);
-      calendar.appendChild(weekCard);
-    }
+  for(let d=1; d<=months[ayKey].days; d++){
+    createDayCard(d);
   }
 }
 
-/* ---------- GÜN KARTI ---------- */
+/* ---------- GÜN KARTI VE VERİ SENKRONİZASYONU ---------- */
 function createDayCard(d){
-  const textKey = `${ayKey}-${d}-text`;
-  const imgKey  = `${ayKey}-${d}-images`;
-
+  const dbPath = `ajanda/${ayKey}/gun-${d}`;
+  
   const day = document.createElement("div");
   day.className = "day fade-up";
   
@@ -88,84 +61,63 @@ function createDayCard(d){
   h.innerText = d + ". Gün";
 
   const ta = document.createElement("textarea");
-  ta.placeholder = "Yaz bakim.";
-  ta.value = localStorage.getItem(textKey)||"";
-  ta.oninput = ()=> localStorage.setItem(textKey, ta.value);
+  ta.placeholder = "Günün notunu buraya yaz...";
 
-  const input = document.createElement("input");
-  input.type="file";
-  input.accept="image/*";
-  input.multiple=true;
+  // Firebase'den Yazıyı Çek (Gerçek Zamanlı Dinle)
+  db.ref(`${dbPath}/text`).on('value', (snapshot) => {
+    ta.value = snapshot.val() || "";
+  });
 
-  const gallery = document.createElement("div");
-  gallery.className="day-gallery";
-
-  const saved = JSON.parse(localStorage.getItem(imgKey)||"[]");
-saved.forEach(src=>{
-  const imgWrap = document.createElement("div");
-  imgWrap.className = "img-wrap";
-
-  const img = document.createElement("img");
-  img.src = src;
-
-  const del = document.createElement("span");
-  del.innerText = "🗑";
-  del.onclick = ()=>{
-    const updated = JSON.parse(localStorage.getItem(imgKey)||[])
-      .filter(i => i !== src);
-    localStorage.setItem(imgKey, JSON.stringify(updated));
-    imgWrap.remove();
+  // Firebase'e Yazıyı Kaydet
+  ta.oninput = () => {
+    db.ref(`${dbPath}/text`).set(ta.value);
   };
 
-  imgWrap.append(img, del);
-  gallery.appendChild(imgWrap);
-});
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.multiple = true;
 
+  const gallery = document.createElement("div");
+  gallery.className = "day-gallery";
 
-  input.onchange=()=>{
-    input.onchange = ()=>{
-  const files = Array.from(input.files);
-  const current = JSON.parse(localStorage.getItem(imgKey)||"[]");
-
-  files.forEach(file=>{
-    const reader = new FileReader();
-    reader.onload = ()=>{
-      current.push(reader.result);
-      localStorage.setItem(imgKey, JSON.stringify(current));
-
+  // Firebase'den Fotoğrafları Çek (Gerçek Zamanlı)
+  db.ref(`${dbPath}/images`).on('value', (snapshot) => {
+    gallery.innerHTML = "";
+    const images = snapshot.val() || [];
+    images.forEach((src, index) => {
       const imgWrap = document.createElement("div");
       imgWrap.className = "img-wrap";
 
       const img = document.createElement("img");
-      img.src = reader.result;
+      img.src = src;
 
       const del = document.createElement("span");
       del.innerText = "🗑";
-      del.onclick = ()=>{
-        const updated = JSON.parse(localStorage.getItem(imgKey)||[])
-          .filter(i => i !== reader.result);
-        localStorage.setItem(imgKey, JSON.stringify(updated));
-        imgWrap.remove();
+      del.onclick = () => {
+        const updatedImages = images.filter((_, i) => i !== index);
+        db.ref(`${dbPath}/images`).set(updatedImages);
       };
 
       imgWrap.append(img, del);
       gallery.appendChild(imgWrap);
-    };
-    reader.readAsDataURL(file);
+    });
   });
-};
 
-
-    files.forEach(f=>{
-      const r = new FileReader();
-      r.onload=()=>{
-        current.push(r.result);
-        localStorage.setItem(imgKey, JSON.stringify(current));
-        const img = document.createElement("img");
-        img.src = r.result;
-        gallery.appendChild(img);
-      };
-      r.readAsDataURL(f);
+  // Fotoğraf Yükleme ve Firebase'e Gönderme
+  input.onchange = () => {
+    const files = Array.from(input.files);
+    db.ref(`${dbPath}/images`).once('value').then(snapshot => {
+      const currentImages = snapshot.val() || [];
+      
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          currentImages.push(reader.result);
+          db.ref(`${dbPath}/images`).set(currentImages);
+        };
+        reader.readAsDataURL(file);
+      });
     });
   };
 
@@ -173,44 +125,23 @@ saved.forEach(src=>{
   calendar.appendChild(day);
 }
 
-
-function renderCalendar(){
-  calendar.innerHTML = "";
-  for(let d=1; d<=months[ayKey].days; d++){
-    createDayCard(d);
-  }
-}
-renderCalendar();
-/* ================= LIGHTBOX (GARANTİ) ================= */
-
+/* ---------- LIGHTBOX (GÖRSEL BÜYÜTME) ---------- */
 let lightbox = document.getElementById("lightbox");
-
 if(!lightbox){
   lightbox = document.createElement("div");
   lightbox.id = "lightbox";
-  lightbox.innerHTML = `
-    <img id="lightbox-img">
-    <button id="closeLightbox">✕</button>
-  `;
+  lightbox.innerHTML = `<img id="lightbox-img"><button id="closeLightbox">✕</button>`;
   document.body.appendChild(lightbox);
 }
 
-const lbImg = document.getElementById("lightbox-img");
-const lbClose = document.getElementById("closeLightbox");
-
-lbClose.onclick = ()=> lightbox.classList.remove("show");
-
-/* 🔴 KRİTİK OLAY */
-document.addEventListener("click", e=>{
+document.addEventListener("click", e => {
   const img = e.target.closest(".day-gallery img");
   if(img){
-    lbImg.src = img.src;
+    document.getElementById("lightbox-img").src = img.src;
     lightbox.classList.add("show");
   }
 });
 
-lightbox.addEventListener("click", e=>{
-  if(e.target === lightbox){
-    lightbox.classList.remove("show");
-  }
-});
+lightbox.onclick = (e) => {
+  if(e.target.id !== "lightbox-img") lightbox.classList.remove("show");
+};
