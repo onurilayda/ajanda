@@ -3,13 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ay</title>
+<title>Ocak</title>
+
 <link rel="stylesheet" href="style.css">
 
 <!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
+
 <body>
 
 <button id="themeBtn">🌙</button>
@@ -20,67 +22,8 @@
 
 <a href="aylar.html" class="back">← Aylar</a>
 
-<script>
-/* =======================
-   AY AYARLARI
-======================= */
-const ay = "ocak";     // 🔥 BU SAYFA HANGİ AYSA DEĞİŞTİR
-const gunSayisi = 31;
-
-/* =======================
-   FIREBASE
-======================= */
-const firebaseConfig = {
-  apiKey: "AIzaSyBHXwARt_g0fLa4XlelwWsLT5FQyEPBBqc",
-  authDomain: "ajanda-e0287.firebaseapp.com",
-  databaseURL: "https://ajanda-e0287-default-rtdb.firebaseio.com",
-  projectId: "ajanda-e0287",
-  appId: "1:819622658290:web:28e097a95a51d1eb8b106b"
-};
-
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
-const db = firebase.database();
-
-/* =======================
-   GÜNLERİ OLUŞTUR
-======================= */
-const calendar = document.getElementById("calendar");
-
-for (let gun = 1; gun <= gunSayisi; gun++) {
-  const div = document.createElement("div");
-  div.className = "day";
-
-  div.innerHTML = `
-    <h3>${gun}. Gün</h3>
-    <input type="text"
-           placeholder="Bugün ne yaşadık?"
-           data-ay="${ay}"
-           data-gun="${gun}">
-  `;
-
-  calendar.appendChild(div);
-}
-
-/* =======================
-   FIREBASE BAĞLA
-======================= */
-document.querySelectorAll("input[data-ay]").forEach(input => {
-  const ay = input.dataset.ay;
-  const gun = input.dataset.gun;
-
-  // Firebase → input
-  db.ref(`ajanda/${ay}/${gun}`).on("value", snap => {
-    input.value = snap.val() || "";
-  });
-
-  // input → Firebase
-  input.addEventListener("input", () => {
-    db.ref(`ajanda/${ay}/${gun}`).set(input.value);
-  });
-});
-</script>
+<!-- SENİN JS -->
+<script src="script.js"></script>
 
 </body>
 </html>
