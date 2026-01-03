@@ -212,5 +212,71 @@ document.addEventListener("click", e=>{
 lightbox.addEventListener("click", e=>{
   if(e.target === lightbox){
     lightbox.classList.remove("show");
+
+    /* =====================
+   AY AYARLARI
+===================== */
+const AY = "ocak";
+const GUN_SAYISI = 31;
+
+/* =====================
+   FIREBASE
+===================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyBHXwARt_g0fLa4XlelwWsLT5FQyEPBBqc",
+  authDomain: "ajanda-e0287.firebaseapp.com",
+  databaseURL: "https://ajanda-e0287-default-rtdb.firebaseio.com",
+  projectId: "ajanda-e0287",
+  appId: "1:819622658290:web:28e097a95a51d1eb8b106b"
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+const db = firebase.database();
+
+/* =====================
+   GÜNLERİ OLUŞTUR
+===================== */
+const calendar = document.getElementById("calendar");
+
+for (let gun = 1; gun <= GUN_SAYISI; gun++) {
+  const card = document.createElement("div");
+  card.className = "day-card";
+
+  card.innerHTML = `
+    <h3>${gun}. Gün</h3>
+
+    <textarea
+      placeholder="Yaz bakalım."
+      data-ay="${AY}"
+      data-gun="${gun}"></textarea>
+
+    <input type="file">
+  `;
+
+  calendar.appendChild(card);
+}
+
+/* =====================
+   FIREBASE BAĞLA
+===================== */
+document.querySelectorAll("textarea[data-ay]").forEach(area => {
+  const ay = area.dataset.ay;
+  const gun = area.dataset.gun;
+
+  // Firebase → textarea
+  db.ref(`ajanda/${ay}/${gun}`).on("value", snap => {
+    area.value = snap.val() || "";
+  });
+
+  // textarea → Firebase
+  area.addEventListener("input", () => {
+    db.ref(`ajanda/${ay}/${gun}`).set(area.value);
+  });
+});
+
   }
 });
+
