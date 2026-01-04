@@ -103,6 +103,44 @@ function createDayCard(d){
   day.append(h, ta, input, gallery);
   calendar.appendChild(day);
 }
+/* ---------- LIGHTBOX (GÖRSEL BÜYÜTME) SİSTEMİ ---------- */
 
+// 1. Lightbox elemanlarını oluştur (Eğer HTML'de yoksa)
+let lightbox = document.getElementById("lightbox");
+if(!lightbox){
+  lightbox = document.createElement("div");
+  lightbox.id = "lightbox";
+  lightbox.innerHTML = `
+    <span id="closeLightbox">&times;</span>
+    <img id="lightbox-img">
+  `;
+  document.body.appendChild(lightbox);
+}
+
+const lbImg = document.getElementById("lightbox-img");
+const lbClose = document.getElementById("closeLightbox");
+
+// 2. Görsele tıklandığında açma olayı
+document.addEventListener("click", e => {
+  // Tıklanan şey bir galeri görseli mi kontrol et
+  const img = e.target.closest(".day-gallery img");
+  if(img){
+    lbImg.src = img.src; // Tıklanan resmin kaynağını al
+    lightbox.classList.add("show"); // Lightbox'ı göster
+    document.body.style.overflow = "hidden"; // Sayfanın kaymasını engelle
+  }
+});
+
+// 3. Kapatma olayları (Çarpıya basınca veya dışarıya tıklayınca)
+const closeLB = () => {
+  lightbox.classList.remove("show");
+  document.body.style.overflow = "auto"; // Kaydırmayı geri aç
+};
+
+lbClose.onclick = closeLB;
+lightbox.onclick = (e) => {
+  if(e.target !== lbImg) closeLB();
+};
 // Sayfa yüklendiğinde çalıştır
 if(ayKey && months[ayKey]) renderCalendar();
+
