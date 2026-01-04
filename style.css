@@ -575,3 +575,34 @@ body.dark{
   font-weight: bold;
   cursor: pointer;
 }
+/* LIGHTBOX SİSTEMİ - GÖRÜNÜRLÜK AYARI */
+#lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: none; /* Başlangıçta gizli */
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+#lightbox.show {
+  display: flex !important; /* JS .show eklediğinde görünür yap */
+}
+
+#lightbox img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+#closeLightbox {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  user-select: none;
+}
