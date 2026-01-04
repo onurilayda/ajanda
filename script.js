@@ -138,9 +138,15 @@ const closeLB = () => {
 };
 
 lbClose.onclick = closeLB;
+// Kapatma fonksiyonunu şu şekilde güncellemek daha garanti olur:
 lightbox.onclick = (e) => {
-  if(e.target !== lbImg) closeLB();
+  // Eğer tıklanan şey resmin kendisi değilse kapat
+  if (e.target.id !== "lightbox-img") {
+    lightbox.classList.remove("show");
+    document.body.style.overflow = "auto";
+  }
 };
 // Sayfa yüklendiğinde çalıştır
 if(ayKey && months[ayKey]) renderCalendar();
+
 
