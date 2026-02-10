@@ -606,3 +606,67 @@ body.dark{
   cursor: pointer;
   user-select: none;
 }
+/* --- MOBİL UYUMLULUK KODLARI (RESPONSIVE) --- */
+
+@media screen and (max-width: 768px) {
+
+    /* 1. Takvim Izgarasını Düzelt */
+    #calendar {
+        display: flex !important;
+        flex-direction: column; /* Yan yana değil alt alta diz */
+        padding: 10px;
+        gap: 20px;
+    }
+
+    /* 2. Gün Kartlarını Ekrana Yay */
+    .day {
+        width: 100% !important; /* Genişliği %100 yap */
+        margin: 0 !important;
+        box-sizing: border-box; /* Padding taşmasını engelle */
+    }
+
+    /* 3. Metin Alanlarını ve Butonları Telelona Göre Ayarla */
+    .day textarea {
+        width: 100%;
+        min-height: 100px; /* Daha rahat yazılsın */
+        font-size: 16px; /* iOS'ta zoom yapmayı engeller */
+    }
+
+    /* 4. Galeri Resimlerini Hizala */
+    .day-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* Resimler sığsın */
+        gap: 5px;
+    }
+
+    .img-wrap {
+        width: 100%;
+        height: 80px; /* Mobilde kare kare dursun */
+    }
+
+    .img-wrap img, .img-wrap video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* 5. Lightbox (Büyütme Ekranı) Düzeltmeleri */
+    #lightbox-content {
+        width: 95%; /* Ekrana tam sığsın */
+    }
+    
+    #lightbox-img, #lightbox-video {
+        max-width: 100%;
+        max-height: 70vh; /* Mobilde çok uzamasın */
+    }
+
+    #closeLightbox {
+        font-size: 40px; /* Mobilde parmakla basmak için büyüt */
+        top: 10px;
+        right: 10px;
+        background: rgba(0,0,0,0.5); /* Görünür olsun diye arka plan */
+        padding: 0 10px;
+        border-radius: 5px;
+    }
+}
+
