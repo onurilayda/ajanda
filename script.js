@@ -81,131 +81,93 @@ function renderCalendar(){
 
 
 function createDayCard(d){
-
   const dbPath = `ajanda/${ayKey}/gun-${d}`;
-
   const day = document.createElement("div");
-
   day.className = "day fade-up";
-
-  
-
+   
   const h = document.createElement("h3");
-
   h.innerText = d + ". Gün";
 
-
-
   const ta = document.createElement("textarea");
-
   ta.placeholder = "Günün notunu buraya yaz...";
 
-
-
   db.ref(`${dbPath}/text`).on('value', (snapshot) => {
-
     ta.value = snapshot.val() || "";
-
   });
-
-
 
   ta.oninput = () => {
-
     db.ref(`${dbPath}/text`).set(ta.value);
-
   };
-
-
 
   const input = document.createElement("input");
-
   input.type = "file";
-
-  input.accept = "image/*";
-
+  // DEĞİŞİKLİK 1: Hem resim hem video kabul et
+  input.accept = "image/*, video/*"; 
   input.multiple = true;
 
-
-
   const gallery = document.createElement("div");
-
   gallery.className = "day-gallery";
 
-
-
   db.ref(`${dbPath}/images`).on('value', (snapshot) => {
-
     gallery.innerHTML = "";
-
-    const images = snapshot.val() || [];
-
-    images.forEach((src, index) => {
-
+    const medias = snapshot.val() || []; // Değişken adını images yerine medias yaptım (genel olduğu için)
+    medias.forEach((src, index) => {
       const imgWrap = document.createElement("div");
-
       imgWrap.className = "img-wrap";
-
-      const img = document.createElement("img");
-
-      img.src = src;
+      
+      // DEĞİŞİKLİK 2: Veri video mu resim mi kontrol et
+      let mediaElement;
+      if(src.startsWith("data:video")) {
+          // Eğer videoysa video etiketi oluştur
+          mediaElement = document.createElement("video");
+          mediaElement.src = src;
+          mediaElement.style.maxWidth = "100%"; // Tasarımı bozmaması için
+          // Küçük önizlemede kontroller olmasın, tıklayınca lightbox'ta açılır
+          // İstersen buraya 'controls' ekleyerek direkt burada da oynatabilirsin
+      } else {
+          // Değilse resim etiketi oluştur (Eski yöntem)
+          mediaElement = document.createElement("img");
+          mediaElement.src = src;
+      }
 
       const del = document.createElement("span");
-
       del.innerText = "🗑";
-
-      del.onclick = () => {
-
-        const updatedImages = images.filter((_, i) => i !== index);
-
-        db.ref(`${dbPath}/images`).set(updatedImages);
-
+      del.onclick = (e) => {
+        e.stopPropagation(); // Silme butonuna basınca lightbox açılmasın
+        const updatedMedias = medias.filter((_, i) => i !== index);
+        db.ref(`${dbPath}/images`).set(updatedMedias);
       };
 
-      imgWrap.append(img, del);
-
+      imgWrap.append(mediaElement, del);
       gallery.appendChild(imgWrap);
-
     });
-
   });
 
-
-
   input.onchange = () => {
-
     const files = Array.from(input.files);
-
+    // Videolar büyük olduğu için veritabanı limitine takılabilir, uyarısı aşağıda*
     db.ref(`${dbPath}/images`).once('value').then(snapshot => {
-
-      const currentImages = snapshot.val() || [];
-
-      files.forEach(file => {
-
-        const reader = new FileReader();
-
-        reader.onload = () => {
-
-          currentImages.push(reader.result);
-
-          db.ref(`${dbPath}/images`).set(currentImages);
-
-        };
-
-        reader.readAsDataURL(file);
-
+      const currentMedias = snapshot.val() || [];
+      
+      // Promise yapısı kullanarak tüm dosyaların okunmasını bekle
+      const fileReaders = files.map(file => {
+          return new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result);
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
+          });
       });
 
+      Promise.all(fileReaders).then(results => {
+          results.forEach(result => currentMedias.push(result));
+          db.ref(`${dbPath}/images`).set(currentMedias);
+      });
     });
-
   };
 
-
-
   day.append(h, ta, input, gallery);
-
   calendar.appendChild(day);
-
 }
 
 /* ---------- LIGHTBOX (GÖRSEL BÜYÜTME) SİSTEMİ ---------- */
@@ -214,86 +176,72 @@ function createDayCard(d){
 
 // 1. Lightbox elemanlarını oluştur (Eğer HTML'de yoksa)
 
+/* ---------- LIGHTBOX (GÖRSEL/VIDEO BÜYÜTME) SİSTEMİ ---------- */
+
+// 1. Lightbox elemanlarını oluştur
 let lightbox = document.getElementById("lightbox");
-
 if(!lightbox){
-
   lightbox = document.createElement("div");
-
   lightbox.id = "lightbox";
-
+  // İçeriğe hem img hem video etiketi ekliyoruz, hangisi lazımsa onu göstereceğiz
   lightbox.innerHTML = `
-
     <span id="closeLightbox">&times;</span>
-
-    <img id="lightbox-img">
-
+    <div id="lightbox-content" style="position:relative; display:flex; justify-content:center; align-items:center;">
+        <img id="lightbox-img" style="display:none; max-width:90%; max-height:80vh;">
+        <video id="lightbox-video" controls style="display:none; max-width:90%; max-height:80vh;"></video>
+    </div>
   `;
-
   document.body.appendChild(lightbox);
-
 }
 
-
-
 const lbImg = document.getElementById("lightbox-img");
-
+const lbVideo = document.getElementById("lightbox-video");
 const lbClose = document.getElementById("closeLightbox");
 
-
-
-// 2. Görsele tıklandığında açma olayı
-
+// 2. Galeri öğesine (resim veya video) tıklandığında açma olayı
 document.addEventListener("click", e => {
-
-  // Tıklanan şey bir galeri görseli mi kontrol et
-
-  const img = e.target.closest(".day-gallery img");
-
-  if(img){
-
-    lbImg.src = img.src; // Tıklanan resmin kaynağını al
-
-    lightbox.classList.add("show"); // Lightbox'ı göster
-
-    document.body.style.overflow = "hidden"; // Sayfanın kaymasını engelle
-
+  // Tıklanan şey bir galeri görseli veya videosu mu kontrol et
+  const target = e.target;
+  
+  if (target.closest(".day-gallery")) {
+      // Eğer tıklanan bir resimse
+      if (target.tagName === "IMG") {
+          lbVideo.style.display = "none";
+          lbVideo.pause(); // Varsa çalan videoyu durdur
+          lbImg.src = target.src;
+          lbImg.style.display = "block";
+          lightbox.classList.add("show");
+          document.body.style.overflow = "hidden";
+      }
+      // Eğer tıklanan bir videoysa
+      else if (target.tagName === "VIDEO") {
+          lbImg.style.display = "none";
+          lbVideo.src = target.src;
+          lbVideo.style.display = "block";
+          lightbox.classList.add("show");
+          // Otomatik oynatmak istersen:
+          // lbVideo.play(); 
+          document.body.style.overflow = "hidden";
+      }
   }
-
 });
 
-
-
-// 3. Kapatma olayları (Çarpıya basınca veya dışarıya tıklayınca)
-
+// 3. Kapatma olayları
 const closeLB = () => {
-
   lightbox.classList.remove("show");
-
-  document.body.style.overflow = "auto"; // Kaydırmayı geri aç
-
+  document.body.style.overflow = "auto";
+  lbVideo.pause(); // Kapatınca videoyu durdur
+  lbVideo.src = ""; // Kaynağı boşalt
 };
-
-
 
 lbClose.onclick = closeLB;
 
-// Kapatma fonksiyonunu şu şekilde güncellemek daha garanti olur:
-
 lightbox.onclick = (e) => {
-
-  // Eğer tıklanan şey resmin kendisi değilse kapat
-
-  if (e.target.id !== "lightbox-img") {
-
-    lightbox.classList.remove("show");
-
-    document.body.style.overflow = "auto";
-
+  // Eğer tıklanan yer resim veya video değilse (boşluksa) kapat
+  if (e.target !== lbImg && e.target !== lbVideo) {
+    closeLB();
   }
-
 };
 
 // Sayfa yüklendiğinde çalıştır
-
 if(ayKey && months[ayKey]) renderCalendar();
