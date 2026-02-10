@@ -60,30 +60,66 @@ function createDayCard(d){
 
   const input = document.createElement("input");
   input.type = "file";
-  input.accept = "image/*";
+  // HEM RESİM HEM VİDEO KABUL ET
+  input.accept = "image/*,video/*";
   input.multiple = true;
 
   const gallery = document.createElement("div");
   gallery.className = "day-gallery";
 
-  db.ref(`${dbPath}/images`).on('value', (snapshot) => {
+  db.ref(`${dbPath}/media`).on('value', (snapshot) => {
     gallery.innerHTML = "";
-    const images = snapshot.val() || [];
-    images.forEach((src, index) => {
-      const imgWrap = document.createElement("div");
-      imgWrap.className = "img-wrap";
-      const img = document.createElement("img");
-      img.src = src;
+    const mediaList = snapshot.val() || [];
+    mediaList.forEach((item, index) => {
+      const wrap = document.createElement("div");
+      wrap.className = "img-wrap"; // CSS sınıflarını ortak kullanabiliriz
+      
+      let element;
+      // DOSYA TİPİNE GÖRE ELEMENT OLUŞTUR
+      if(item.type === "video") {
+          element = document.createElement("video");
+          element.src = item.src;
+          element.controls = true; // Video kontrollerini ekle
+      } else {
+          element = document.createElement("img");
+          element.src = item.src;
+      }
+
       const del = document.createElement("span");
       del.innerText = "🗑";
       del.onclick = () => {
-        const updatedImages = images.filter((_, i) => i !== index);
-        db.ref(`${dbPath}/images`).set(updatedImages);
+        const updatedMedia = mediaList.filter((_, i) => i !== index);
+        db.ref(`${dbPath}/media`).set(updatedMedia);
       };
-      imgWrap.append(img, del);
-      gallery.appendChild(imgWrap);
+      
+      wrap.append(element, del);
+      gallery.appendChild(wrap);
     });
   });
+
+  input.onchange = () => {
+    const files = Array.from(input.files);
+    db.ref(`${dbPath}/media`).once('value').then(snapshot => {
+      const currentMedia = snapshot.val() || [];
+      files.forEach(file => {
+        const reader = new FileReader();
+        const isVideo = file.type.startsWith("video"); // Video olup olmadığını kontrol et
+        
+        reader.onload = () => {
+          currentMedia.push({
+            src: reader.result,
+            type: isVideo ? "video" : "image"
+          });
+          db.ref(`${dbPath}/media`).set(currentMedia);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  };
+
+  day.append(h, ta, input, gallery);
+  calendar.appendChild(day);
+}
 
   input.onchange = () => {
     const files = Array.from(input.files);
@@ -148,5 +184,6 @@ lightbox.onclick = (e) => {
 };
 // Sayfa yüklendiğinde çalıştır
 if(ayKey && months[ayKey]) renderCalendar();
+
 
 
